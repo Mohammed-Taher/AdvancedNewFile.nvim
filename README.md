@@ -46,5 +46,5 @@ If installed, this plugn will work with [nvim-notify](https://github.com/rcarrig
 
 ## TODO
 
-[] Add some configuration.
-[] Test on Windows.
+- Add some configuration.
+- Test on Windows.
