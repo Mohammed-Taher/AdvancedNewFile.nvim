@@ -1,5 +1,6 @@
 local has_notify, notify = pcall(require, "notify")
 local fn = vim.fn
+
 local M = {}
 
 local function notify_level(level)
@@ -31,6 +32,10 @@ function M.clear_prompt()
 	if vim.opt.cmdheight._value ~= 0 then
 		vim.cmd("normal! :")
 	end
+end
+
+function M.goto_file(file)
+	vim.api.nvim_command("edit " .. file)
 end
 
 function M.create_file(value)

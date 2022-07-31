@@ -1,15 +1,26 @@
 local fn = vim.fn
 local utils = require("advanced_new_file.utils")
 
+-- TODO: Add these configurations
 local M = {
 	goto_file = true,
 	notify = true,
+	show_cwd = false,
+	prompt = "File name (or Folder): ",
 }
+--
 
 local path_separator = package.config:sub(1, 1)
 
+local set_prompt = function()
+	if M.show_cwd then
+		return vim.fn.getcwd()
+	end
+	return M.prompt
+end
+
 function M.run()
-	vim.ui.input({ prompt = "File:", completion = "file" }, function(new_file_path)
+	vim.ui.input({ prompt = set_prompt(), completion = "file" }, function(new_file_path)
 		-- Check if the input was empty
 		if new_file_path == nil then
 			return
@@ -24,7 +35,6 @@ function M.run()
 				end
 			else
 				utils.clear_prompt()
-
 				if M.notify then
 					utils.notify.error("Couldn't create folder " .. new_file_path)
 				end
@@ -38,7 +48,21 @@ function M.run()
 			if fn.isdirectory(folder) == 0 then
 				fn.mkdir(folder, "p")
 			end
-			utils.create_file(new_file_path)
+			if utils.file_exists(new_file_path) then
+				utils.clear_prompt()
+				if M.notify then
+					utils.notify.error("File already exists!")
+					utils.goto_file(new_file_path)
+				end
+			else
+				utils.create_file(new_file_path)
+				if M.notify then
+					utils.notify.info(new_file_path .. " was created!")
+				end
+				if M.goto_file then
+					utils.goto_file(new_file_path)
+				end
+			end
 			return
 		end
 
@@ -47,6 +71,7 @@ function M.run()
 			utils.clear_prompt()
 			if M.notify then
 				utils.notify.error("File already exists!")
+				utils.goto_file(new_file_path)
 			end
 		else
 			utils.clear_prompt()
@@ -55,11 +80,10 @@ function M.run()
 			end
 			utils.create_file(new_file_path)
 			if M.goto_file then
-				vim.api.nvim_command("edit " .. new_file_path)
+				utils.goto_file(new_file_path)
 			end
 		end
 	end)
 end
 
-M.run()
 return M
